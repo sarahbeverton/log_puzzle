@@ -2,3 +2,5 @@
 *.pyc
 .DS_Store
 __pycache__/
+/animal_dir
+/place_dir

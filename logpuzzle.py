@@ -14,6 +14,8 @@ HTTP/1.0" 302 528 "-" "Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US;
 rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
 """
 
+__author__ = "Sarah Beverton"
+
 import os
 import re
 import sys
@@ -26,8 +28,30 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    puzzle_urls = []
+    site_pattern = re.compile(r'_(\S+)')
+    site = site_pattern.search(filename)
+    site = site.group(1)
+    with open(filename, 'r') as f:
+        puzzle_text = f.readlines()
+        pattern = re.compile(r'(\S+puzzle\S+)')
+        for line in puzzle_text:
+            url = pattern.search(line)
+            if url:
+                puzzle_urls.append(url.group(1))
+    puzzle_urls = list(dict.fromkeys(puzzle_urls))
+
+    # if it is from the place puzzle, sort by last group of chars
+    place_pattern = re.compile(r'\S+puzzle\S+-\S+-(\S+)')
+    for url in puzzle_urls:
+        place = place_pattern.search(url)
+        if place:
+            puzzle_urls = sorted(puzzle_urls, key=lambda
+                                 x: place_pattern.search(x).group(1))
+        else:
+            puzzle_urls = sorted(puzzle_urls)
+    puzzle_urls = ['http://' + site + url for url in puzzle_urls]
+    return puzzle_urls
 
 
 def download_images(img_urls, dest_dir):
@@ -38,8 +62,29 @@ def download_images(img_urls, dest_dir):
     to show each local image file.
     Creates the directory if necessary.
     """
-    # +++your code here+++
-    pass
+    # Create the directory for the images and index
+    try:
+        os.mkdir(dest_dir)
+    except FileExistsError as exc:
+        print(exc)
+
+    # Retrieve each image from the url and name it img[index]
+    for i, url in enumerate(img_urls):
+        print("Retrieving...", url)
+        urllib.request.urlretrieve(url, dest_dir + '/img' + str(i))
+
+    # Create the index.html file
+    index_path = os.path.join(dest_dir, 'index.html')
+
+    # Create string of images
+    image_string = ''
+    for i, url in enumerate(img_urls):
+        image_string += '<img src="' + 'img' + str(i) + '">'
+
+    # Write html file
+    with open(index_path, 'w') as index_file:
+        index_file.write('<html>\n<body>\n' +
+                         image_string + '\n</body>\n</html>')
 
 
 def create_parser():
