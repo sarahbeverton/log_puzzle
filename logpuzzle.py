@@ -26,8 +26,21 @@ def read_urls(filename):
     extracting the hostname from the filename itself, sorting
     alphabetically in increasing order, and screening out duplicates.
     """
-    # +++your code here+++
-    pass
+    puzzle_urls = []
+    site_pattern = re.compile(r'_(\S+)')
+    site = site_pattern.search(filename)
+    site = site.group(1)
+    with open(filename, 'r') as f:
+        puzzle_text = f.readlines()
+        pattern = re.compile(r'(\S+puzzle\S+)')
+        for line in puzzle_text:
+            url = pattern.search(line)
+            if url:
+                puzzle_urls.append(url.group(1))
+    puzzle_urls = list(dict.fromkeys(puzzle_urls))
+    puzzle_urls = sorted(puzzle_urls)
+    puzzle_urls = ['http://' + site + url for url in puzzle_urls]
+    return puzzle_urls
 
 
 def download_images(img_urls, dest_dir):
